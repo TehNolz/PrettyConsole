@@ -20,24 +20,17 @@ namespace PrettyConsole {
 				case ConsoleKey.LeftArrow:
 					if (Tab.AllowArrowTabSwitch) {
 						ConsoleThread.SwitchTab(true);
-					} else {
-						Tab.HorizontalOffset--;
 					}
 					break;
 				case ConsoleKey.RightArrow:
 					if (Tab.AllowArrowTabSwitch) {
 						ConsoleThread.SwitchTab();
 					}
-					else {
-						Tab.HorizontalOffset++;
-					}
 					break;
 
 				case ConsoleKey.UpArrow:
-					Tab.VerticalOffset++;
 					break;
 				case ConsoleKey.DownArrow:
-					Tab.VerticalOffset--;
 					break;
 			}
 		}

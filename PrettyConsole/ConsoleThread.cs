@@ -36,6 +36,7 @@ namespace PrettyConsole {
 			int Width = Console.WindowWidth;
 			if (Width < 10) Console.WindowWidth = 10;
 
+			Console.Clear();
 			while (true) {
 				Console.CursorVisible = false;
 				//Clear screen on resize
@@ -61,9 +62,11 @@ namespace PrettyConsole {
 
 				//Draw the lines this tab wants to show.
 				List<string> ToDraw = CurrentTab.Draw(Console.WindowHeight - 4);
+				if (ToDraw.Count > Console.WindowHeight - 4) throw new IndexOutOfRangeException("Tab attempted to draw more lines than allowed");
 				foreach(string Line in ToDraw) {
 					Console.WriteLine(Line + new string(' ', Math.Max(Console.BufferWidth-Line.Length, 0)));
 				}
+
 				//Set cursor to footer position if necessary
 				if (ToDraw.Count < Console.WindowHeight - 3) Console.SetCursorPosition(0, Console.WindowHeight - 3);
 
@@ -126,20 +129,32 @@ namespace PrettyConsole {
 	}
 
 	public abstract class ConsoleTab {
+		/// <summary>
+		/// This tab's name
+		/// </summary>
 		public readonly string Name;
+
+		/// <summary>
+		/// Whether this tab allows the user to switch tabs using the arrow keys.
+		/// Should never be permanently set to false.
+		/// </summary>
 		public bool AllowArrowTabSwitch { get; set; } = true;
 
-		private int _VerticalOffset = 0;
-		public virtual int VerticalOffset { get => _VerticalOffset; set => _VerticalOffset = value; }
-
-		private int _HorizontalOffset = 0;
-		public virtual int HorizontalOffset {
-			get => _HorizontalOffset;
-			set => _HorizontalOffset = value;
+		/// <summary>
+		/// Creates a new console tab.
+		/// Automatically starts the console thread if it isn't already running.
+		/// </summary>
+		/// <param name="Name"></param>
+		public ConsoleTab(string Name) {
+			if (!ConsoleThread.Running) ConsoleThread.Start();
+			this.Name = Name;
 		}
 
-		public ConsoleTab(string Name) => this.Name = Name;
-
+		/// <summary>
+		/// Returns the lines that the tab should draw on the current frame.
+		/// </summary>
+		/// <param name="AllowedLines">The amount of lines the tab is allowed to draw.</param>
+		/// <returns></returns>
 		public abstract List<string> Draw(int AllowedLines);
 	}
 }
