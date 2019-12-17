@@ -4,9 +4,7 @@ namespace PrettyConsole {
 	static class KeyInput {
 		internal static void Run() {
 			while (true) {
-				ConsoleKeyInfo Key = Console.ReadKey(true);
-				Console.Beep();
-				ConsoleThread.CommandQueue.Enqueue(new KeyInputCommand(Key, ConsoleThread.CurrentTab));
+				ConsoleThread.CommandQueue.Enqueue(new KeyInputCommand(Console.ReadKey(true), ConsoleThread.CurrentTab));
 			}
 		}
 	}

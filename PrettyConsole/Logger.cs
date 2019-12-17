@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -27,7 +28,7 @@ namespace PrettyConsole {
 			}
 
 			//Start the logwriter if necessary, and if it isn't already running
-			if(WriterThread.ThreadState == ThreadState.Unstarted) {
+			if(WriterThread.ThreadState == System.Threading.ThreadState.Unstarted) {
 				WriterThread.Start();
 			}
 
@@ -39,7 +40,22 @@ namespace PrettyConsole {
 		/// </summary>
 		/// <param name="AllowedLines">The amount of lines that this tab is allowed to draw.</param>
 		/// <returns></returns>
-		public override List<string> Draw(int AllowedLines) => MessageBuffer.Skip(Math.Max(0, MessageBuffer.Count() - AllowedLines)).ToList();
+		public override List<string> Draw(int AllowedLines) {
+			List<string> LastMessages = new List<string>(MessageBuffer.Skip(Math.Max(0, MessageBuffer.Count() - AllowedLines)));
+			List<int> Lengths = new List<int>();
+
+			foreach(string Msg in LastMessages) {
+				Lengths.Add((Msg.Length / Console.BufferWidth) + 1);
+			}
+			int LinesRequired = Lengths.Sum();
+			while (LinesRequired > AllowedLines && LastMessages.Count > 0) {
+				Lengths.RemoveAt(0);
+				LastMessages.RemoveAt(0);
+				LinesRequired = Lengths.Sum();
+			}
+			
+			return LastMessages;
+		}
 
 		/// <summary>
 		/// Create a new logger for this tab.

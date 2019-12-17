@@ -35,7 +35,7 @@ namespace PrettyConsole {
 		public static void CompressLogs() {
 			//If the temp directory already exists (leftovers from a crash or whatever), delete it first
 			if (Directory.Exists("Logs\\temp")) {
-				Directory.Delete("Logs\\temp");
+				Directory.Delete("Logs\\temp", true);
 			}
 			Directory.CreateDirectory("Logs\\temp");
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -30,11 +31,12 @@ namespace PrettyConsole {
 		private static void Run() {
 			while (TabList.Count == 0);
 			CurrentTab = TabList[TabList.Keys.ToList()[0]];
-			
+
+			int MinWidth = 10;
 			int Height = Console.WindowHeight;
-			if (Height < 10) Console.WindowHeight = 10;
+			if (Height < MinWidth) Console.WindowHeight = MinWidth;
 			int Width = Console.WindowWidth;
-			if (Width < 10) Console.WindowWidth = 10;
+			if (Width < MinWidth) Console.WindowWidth = MinWidth;
 
 			Console.Clear();
 			while (true) {
@@ -43,10 +45,10 @@ namespace PrettyConsole {
 				if (Height != Console.WindowHeight || Width != Console.WindowWidth) {
 					Height = Console.WindowHeight;
 					Width = Console.WindowWidth;
-					if (Height < 10) Console.WindowHeight = 10;
-					if (Width < 10) Console.WindowWidth = 10;
 					Console.Clear();
 				}
+				if(Console.WindowHeight < 10) Console.SetWindowSize(Console.WindowWidth, 10);
+				if (MinWidth > Width) Console.SetWindowSize(MinWidth, Console.WindowHeight);
 
 				//Execute all commands until the queue is empty.
 				while (!CommandQueue.IsEmpty) {
@@ -61,8 +63,9 @@ namespace PrettyConsole {
 				WriteColored(new string('═', Console.BufferWidth - CurrentTab.Name.Length - 3), ConsoleColor.DarkBlue);
 
 				//Draw the lines this tab wants to show.
-				List<string> ToDraw = CurrentTab.Draw(Console.WindowHeight - 4);
-				if (ToDraw.Count > Console.WindowHeight - 4) throw new IndexOutOfRangeException("Tab attempted to draw more lines than allowed");
+				int Allowed = Console.WindowHeight - 4;
+				List<string> ToDraw = CurrentTab.Draw(Allowed);
+				if (ToDraw.Count > Allowed) throw new IndexOutOfRangeException("Tab attempted to draw more lines than allowed");
 				foreach(string Line in ToDraw) {
 					Console.WriteLine(Line + new string(' ', Math.Max(Console.BufferWidth-Line.Length, 0)));
 				}
@@ -75,13 +78,16 @@ namespace PrettyConsole {
 				List<string> Tabs = TabList.Keys.ToList();
 				Tabs.Sort();
 				WriteColored("║", ConsoleColor.DarkBlue);
+				int NewMinWidth = 4;
 				foreach (string Tab in Tabs) {
 					bool isCurrentTab = CurrentTab.Name == Tab;
+					NewMinWidth += Tab.Length + 2;
 					WriteColored(" "+Tab+" ", isCurrentTab ? ConsoleColor.Yellow : ConsoleColor.DarkBlue, isCurrentTab ? ConsoleColor.Black : ConsoleColor.White);
 				}
+				Debug.WriteLine(MinWidth + " " + Console.BufferWidth);
+				MinWidth = NewMinWidth;
 				WriteColored(new string(' ', Math.Max(Console.BufferWidth - 1 - Console.CursorLeft, 0)) + "║", ConsoleColor.DarkBlue);
 				WriteColored("╚" + new string('═', Console.BufferWidth-2) + "╝", ConsoleColor.DarkBlue);
-				Console.BackgroundColor = ConsoleColor.Black;
 
 				//Return cursor to top of the screen, wait a bit, then restart.
 				Console.SetCursorPosition(0, 0);
