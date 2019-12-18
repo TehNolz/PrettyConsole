@@ -38,6 +38,8 @@ namespace PrettyConsole {
 			int Width = Console.WindowWidth;
 			if (Width < MinWidth) Console.WindowWidth = MinWidth;
 
+			Console.BackgroundColor = ConsoleColor.Black;
+			Console.ForegroundColor = ConsoleColor.White;
 			Console.Clear();
 			while (true) {
 				Console.CursorVisible = false;
@@ -52,9 +54,7 @@ namespace PrettyConsole {
 
 				//Execute all commands until the queue is empty.
 				while (!CommandQueue.IsEmpty) {
-					if (CommandQueue.TryDequeue(out Command CMD)) {
-						CMD.Execute();
-					};
+					if (CommandQueue.TryDequeue(out Command CMD)) CMD.Execute();
 				}
 
 				//Draw header
@@ -84,12 +84,11 @@ namespace PrettyConsole {
 					NewMinWidth += Tab.Length + 2;
 					WriteColored(" "+Tab+" ", isCurrentTab ? ConsoleColor.Yellow : ConsoleColor.DarkBlue, isCurrentTab ? ConsoleColor.Black : ConsoleColor.White);
 				}
-				Debug.WriteLine(MinWidth + " " + Console.BufferWidth);
 				MinWidth = NewMinWidth;
 				WriteColored(new string(' ', Math.Max(Console.BufferWidth - 1 - Console.CursorLeft, 0)) + "║", ConsoleColor.DarkBlue);
 				WriteColored("╚" + new string('═', Console.BufferWidth-2) + "╝", ConsoleColor.DarkBlue);
 
-				//Return cursor to top of the screen, wait a bit, then restart.
+				//Return cursor to top of the screen, then restart.
 				Console.SetCursorPosition(0, 0);
 			}
 		}
@@ -151,8 +150,8 @@ namespace PrettyConsole {
 		/// Automatically starts the console thread if it isn't already running.
 		/// </summary>
 		/// <param name="Name"></param>
-		public ConsoleTab(string Name) {
-			if (!ConsoleThread.Running) ConsoleThread.Start();
+		public ConsoleTab(string Name, bool Debug = false) {
+			if (!Debug && !ConsoleThread.Running) ConsoleThread.Start();
 			this.Name = Name;
 		}
 

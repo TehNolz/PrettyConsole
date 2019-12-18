@@ -20,7 +20,8 @@ namespace PrettyConsole {
 		/// <param name="Path">The file that messages will be logged to. 
 		/// If the file already exists, the old file will be archived and a new one will be created. 
 		/// Set to null to disable log saving for this tab.</param>
-		public LogTab(string Name) : base(Name) {
+		/// <param name="Debug">Prevents the ConsoleThread from starting, as it breaks unit tests</param>
+		public LogTab(string Name, bool Debug = false) : base(Name, Debug) {
 			if (string.IsNullOrEmpty(Name)) throw new ArgumentException("message", nameof(Name));
 			//Check if a tab already exists with this name
 			foreach (ConsoleTab Tab in ConsoleThread.TabList.Values) {
@@ -28,7 +29,7 @@ namespace PrettyConsole {
 			}
 
 			//Start the logwriter if necessary, and if it isn't already running
-			if(WriterThread.ThreadState == System.Threading.ThreadState.Unstarted) {
+			if(!Debug && WriterThread.ThreadState == System.Threading.ThreadState.Unstarted) {
 				WriterThread.Start();
 			}
 
