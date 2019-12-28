@@ -23,17 +23,11 @@ namespace PrettyConsole {
 		/// <param name="Debug">Prevents the ConsoleThread from starting, as it breaks unit tests</param>
 		public LogTab(string Name, bool Debug = false) : base(Name, Debug) {
 			if (string.IsNullOrEmpty(Name)) throw new ArgumentException("message", nameof(Name));
-			//Check if a tab already exists with this name
-			foreach (ConsoleTab Tab in ConsoleThread.TabList.Values) {
-				if (Tab.Name == Name) throw new ArgumentException("Tab already exists with this name");
-			}
 
 			//Start the logwriter if necessary, and if it isn't already running
 			if(!Debug && WriterThread.ThreadState == System.Threading.ThreadState.Unstarted) {
 				WriterThread.Start();
 			}
-
-			ConsoleThread.TabList[Name] = this;
 		}
 
 		/// <summary>
@@ -66,7 +60,8 @@ namespace PrettyConsole {
 	}
 
 	public class Logger {
-		public LogTab Tab;
+		public LogTab Tab { get; set; }
+
 		public void Debug(object Message) => Log(LogLevel.DEBUG, Message);
 		public void Info(object Message) => Log(LogLevel.INFO, Message);
 		public void Warning(object Message) => Log(LogLevel.WARNING, Message);

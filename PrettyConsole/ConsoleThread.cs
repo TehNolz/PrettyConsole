@@ -134,10 +134,7 @@ namespace PrettyConsole {
 	}
 
 	public abstract class ConsoleTab {
-		/// <summary>
-		/// This tab's name
-		/// </summary>
-		public readonly string Name;
+		public bool Debug { get; }
 
 		/// <summary>
 		/// Whether this tab allows the user to switch tabs using the arrow keys.
@@ -145,14 +142,20 @@ namespace PrettyConsole {
 		/// </summary>
 		public bool AllowArrowTabSwitch { get; set; } = true;
 
+		public string Name { get; }
+
 		/// <summary>
 		/// Creates a new console tab.
 		/// Automatically starts the console thread if it isn't already running.
 		/// </summary>
 		/// <param name="Name"></param>
 		public ConsoleTab(string Name, bool Debug = false) {
-			if (!Debug && !ConsoleThread.Running) ConsoleThread.Start();
+			this.Debug = Debug;
 			this.Name = Name;
+
+			if (!Debug && !ConsoleThread.Running) ConsoleThread.Start();
+			if (ConsoleThread.TabList.ContainsKey(Name)) throw new ArgumentException("A tab already exists with this name");
+			ConsoleThread.TabList[Name] = this;
 		}
 
 		/// <summary>
