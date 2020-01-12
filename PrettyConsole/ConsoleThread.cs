@@ -35,8 +35,8 @@ namespace PrettyConsole {
 			int MinWidth = 10;
 			int Height = Console.WindowHeight;
 			if (Height < MinWidth) Console.WindowHeight = MinWidth;
-			int Width = Console.WindowWidth;
-			if (Width < MinWidth) Console.WindowWidth = MinWidth;
+			int Width = Console.BufferWidth;
+			if (Width < MinWidth) Console.BufferWidth = MinWidth;
 
 			Console.BackgroundColor = ConsoleColor.Black;
 			Console.ForegroundColor = ConsoleColor.White;
@@ -44,12 +44,12 @@ namespace PrettyConsole {
 			while (true) {
 				Console.CursorVisible = false;
 				//Clear screen on resize
-				if (Height != Console.WindowHeight || Width != Console.WindowWidth) {
+				if (Height != Console.WindowHeight || Width != Console.BufferWidth) {
 					Height = Console.WindowHeight;
-					Width = Console.WindowWidth;
+					Width = Console.BufferWidth;
 					Console.Clear();
 				}
-				if(Console.WindowHeight < 10) Console.SetWindowSize(Console.WindowWidth, 10);
+				if(Console.WindowHeight < 10) Console.SetWindowSize(Console.BufferWidth, 10);
 				if (MinWidth > Width) Console.SetWindowSize(MinWidth, Console.WindowHeight);
 
 				//Execute all commands until the queue is empty.
@@ -67,14 +67,15 @@ namespace PrettyConsole {
 				List<string> ToDraw = CurrentTab.Draw(Allowed);
 				if (ToDraw.Count > Allowed) throw new IndexOutOfRangeException("Tab attempted to draw more lines than allowed");
 				foreach(string Line in ToDraw) {
-					Console.WriteLine(Line + new string(' ', Math.Max(Console.BufferWidth-Line.Length, 0)));
+					Console.WriteLine(Line + new string(' ', Math.Max(Console.BufferWidth-Line.Length-1, 0)));
 				}
 
 				//Set cursor to footer position if necessary
 				if (ToDraw.Count < Console.WindowHeight - 3) Console.SetCursorPosition(0, Console.WindowHeight - 3);
 
 				//Construct footer
-				WriteColored("╔" + new string('═', Console.BufferWidth-2) + "╗", ConsoleColor.DarkBlue);
+				WriteColored("╔" + new string('═', Console.BufferWidth - 3) + "╗", ConsoleColor.DarkBlue);
+				Console.Write(' ');
 				List<string> Tabs = TabList.Keys.ToList();
 				Tabs.Sort();
 				WriteColored("║", ConsoleColor.DarkBlue);
@@ -85,11 +86,13 @@ namespace PrettyConsole {
 					WriteColored(" "+Tab+" ", isCurrentTab ? ConsoleColor.Yellow : ConsoleColor.DarkBlue, isCurrentTab ? ConsoleColor.Black : ConsoleColor.White);
 				}
 				MinWidth = NewMinWidth;
-				WriteColored(new string(' ', Math.Max(Console.BufferWidth - 1 - Console.CursorLeft, 0)) + "║", ConsoleColor.DarkBlue);
-				WriteColored("╚" + new string('═', Console.BufferWidth-2) + "╝", ConsoleColor.DarkBlue);
+				WriteColored(new string(' ', Math.Max(Console.BufferWidth - 2 - Console.CursorLeft, 0)) + "║", ConsoleColor.DarkBlue);
+				Console.Write(' ');
+				WriteColored("╚" + new string('═', Console.BufferWidth - 3) + "╝", ConsoleColor.DarkBlue);
 
 				//Return cursor to top of the screen, then restart.
 				Console.SetCursorPosition(0, 0);
+				Thread.Sleep(1);
 			}
 		}
 
@@ -119,7 +122,7 @@ namespace PrettyConsole {
 
 			//Clear previous frame
 			for (int i = 0; i < Console.WindowHeight; i++) {
-				Console.WriteLine(new string(' ', Console.WindowWidth));
+				Console.WriteLine(new string(' ', Console.BufferWidth-1));
 			}
 			Console.SetCursorPosition(0, 0);
 		}
